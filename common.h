@@ -10,8 +10,9 @@ typedef struct {
     char *executable_path;
     char *arguments;
     int priority;
-} command;
+} process_info;
 
 int readconfig(char ***commands_ref);
+int parseconfig(char ***commands_ref, process_info** parsed_processes, int command_count);
 
 #endif
