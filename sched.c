@@ -14,7 +14,7 @@ int main(int argc, char **argv)
 
     if (command_count == -1)
     {
-        return -1;
+        
     }
 
     printf("Read %d command lines\n", command_count);
@@ -23,7 +23,8 @@ int main(int argc, char **argv)
         printf("Command: %s", commands[i]);
     }
 
-    process_info *valid_processes[command_count];
+    process_info **valid_processes = (process_info**)malloc(command_count*sizeof(process_info*));
+
     int parse_result = parseconfig(&commands, &valid_processes, command_count);
 
     if(parse_result == -1){
@@ -33,62 +34,53 @@ int main(int argc, char **argv)
     printf("\nParsed %d valid commands\n", parse_result);
 }
 
-int parseconfig(char ***commands_ref, process_info ***parsed_processes, int command_count)
-{
+int parseconfig(char ***commands_ref, process_info ***parsed_processes, int command_count){
     int p_i = 0;
     int i;
-    for (i = 0; i < command_count; ++i){
-        char *empty_line = "\n";
-        char* target_command = (*commands_ref)[i];
+    for(i = 0; i < command_count; i++){
+        char *empty_line = '\n';
+        char* space = ' ';
+        char *target_command = (*commands_ref)[i];
         if(strcmp(target_command, &empty_line) == 0){
             continue;
         }
-
-        //parse components
-        char* space = ' ';
+        
         char** tokens = str_split(target_command, space);
-        process_info *process = (process_info*) malloc(sizeof(process_info));
+        if(!*(tokens) || !*(tokens+1) || !*(tokens+2)){
+            printf("Invalid line at %d", i);
+            continue;
+        }
 
-        process->process_id = (int*)malloc(sizeof(int));
+        process_info *process = (process_info*)malloc(sizeof(process_info));
         process->process_id = -1;
-        process->current_status = (bool*)malloc(sizeof(bool));
         process->current_status = 0;
-        if(!*(tokens)){
-            printf("Invalid line at %d", i);
-            continue;
-        }
-        process->priority = (int*)malloc(sizeof(int));
-        int priority_parsed = (int)((uintmax_t)strtoumax(*(tokens), NULL, 10));
-        process->priority = &priority_parsed;
+        process->priority = (int)((uintmax_t) strtoumax(*tokens, NULL, 10));
 
-        if(!*(tokens+1)){
-            printf("Invalid line at %d", i);
-            continue;
-        }
-        process->executable_path = (char*)malloc(LINE_MAX_LENGTH*sizeof(char));
-        process->executable_path = *(tokens+1);
-        if(!*(tokens+2)){
-            printf("Invalid line at %d", i);
-            continue;
-        }
-        process->arguments = (char*)malloc(LINE_MAX_LENGTH*sizeof(char));
-        process->arguments = *(tokens+2);
-        int ii;
-        for(ii = 3; *(tokens+ii); ii++){
-            char space_for_concat[] = " ";
-            strcat(space_for_concat, *(tokens+ii));
-            strcat(process->arguments,space_for_concat);
-        }
-        (*parsed_processes)[p_i] = process;
+        process->executable_path = (char*)malloc(sizeof(char) * LINE_MAX_LENGTH);
+        process->executable_path = strdup(*(tokens+1));
+
+        char *space_for_concat = " ";
+        process->arguments = (char*)malloc(sizeof(char) * LINE_MAX_LENGTH);
+        char **arguments = (tokens+2);
+
+        process->arguments = join_strings(arguments, space_for_concat);
+
+        *(parsed_processes + p_i) = &process;
         p_i++;
     }
-    
-    if(p_i == 0){
-        printf("No valid commands to execute were found in config file.");
-        return -1;
-    }else{
-        return p_i;
+    return p_i; 
+}
+
+char* join_strings(char **strings, char *separator){
+    char *str = (char*) malloc(sizeof(str) * LINE_MAX_LENGTH);
+    str[0] = '\0';
+
+    int i = 0;
+    for(i = 0; *(strings+i); i++){
+        strcat(str, *(strings+i));
+        strcat(str, separator);
     }
+    return str;
 }
 
 // https://stackoverflow.com/questions/9210528/split-string-with-delimiters-in-c
