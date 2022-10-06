@@ -13,7 +13,9 @@ typedef struct {
 } process_info;
 
 int readconfig(char ***commands_ref);
-int parseconfig(char ***commands_ref, process_info ***parsed_processes, int command_count);
+
+int parseconfig(char **commands_ref, process_info **parsed_processes, int command_count);
+
 char** str_split(char* a_str, const char a_delim);
 
 char* join_strings(char **strings, char *separator);

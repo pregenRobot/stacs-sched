@@ -4,6 +4,7 @@
 #include <string.h>
 #include <assert.h>
 #include <inttypes.h>
+#include "fifo.h"
 
 #define LINE_MAX_LENGTH 1000
 
@@ -25,50 +26,55 @@ int main(int argc, char **argv)
 
     process_info **valid_processes = (process_info**)malloc(command_count*sizeof(process_info*));
 
-    int parse_result = parseconfig(&commands, &valid_processes, command_count);
+    int parse_result = parseconfig(commands, valid_processes, command_count);
 
     if(parse_result == -1){
         return -1;
     }
 
     printf("\nParsed %d valid commands\n", parse_result);
+
+    // Executing as Fifo
+    fifo_block* processes_head = load(valid_processes, parse_result);
+    int execute_result = execute(processes_head, 0);
+    
+    printf("\nExecuted %d commands\n", execute_result);
 }
 
-int parseconfig(char ***commands_ref, process_info ***parsed_processes, int command_count){
+int parseconfig(char **commands_ref, process_info **parsed_processes, int command_count){
     int p_i = 0;
     int i;
     for(i = 0; i < command_count; i++){
         char *empty_line = '\n';
         char* space = ' ';
-        char *target_command = (*commands_ref)[i];
+        char *target_command = commands_ref[i];
+        char *space_for_concat = " ";
+
         if(strcmp(target_command, &empty_line) == 0){
             continue;
         }
-        
-        char** tokens = str_split(target_command, space);
-        if(!*(tokens) || !*(tokens+1) || !*(tokens+2)){
-            printf("Invalid line at %d", i);
+        char ** tokens = str_split(target_command, space);
+        if(!*(tokens) || !*(tokens+1) || !*(tokens + 2)){
+            printf("\nInvalid line at %d\n", i);
             continue;
         }
 
         process_info *process = (process_info*)malloc(sizeof(process_info));
+
         process->process_id = -1;
         process->current_status = 0;
         process->priority = (int)((uintmax_t) strtoumax(*tokens, NULL, 10));
 
-        process->executable_path = (char*)malloc(sizeof(char) * LINE_MAX_LENGTH);
+        process->executable_path = (char*)malloc(sizeof(char)*LINE_MAX_LENGTH);
         process->executable_path = strdup(*(tokens+1));
 
-        char *space_for_concat = " ";
         process->arguments = (char*)malloc(sizeof(char) * LINE_MAX_LENGTH);
         char **arguments = (tokens+2);
-
         process->arguments = join_strings(arguments, space_for_concat);
-
-        *(parsed_processes + p_i) = &process;
+        parsed_processes[p_i] = process;
         p_i++;
     }
-    return p_i; 
+    return p_i;
 }
 
 char* join_strings(char **strings, char *separator){
@@ -77,8 +83,8 @@ char* join_strings(char **strings, char *separator){
 
     int i = 0;
     for(i = 0; *(strings+i); i++){
-        strcat(str, *(strings+i));
-        strcat(str, separator);
+        strcat(str, strdup(*(strings+i)));
+        strcat(str, strdup(separator));
     }
     return str;
 }

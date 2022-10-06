@@ -1,4 +1,4 @@
 all:
-	gcc -o sched sched.c
+	gcc -o sched -g ./*.c
 clean:
 	rm -f sched
