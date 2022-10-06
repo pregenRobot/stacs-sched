@@ -1,5 +1,5 @@
 #ifndef fifo
-#define common
+#define fifo
 
 #include <stdbool.h>
 #include <sys/types.h>
@@ -11,6 +11,8 @@ typedef struct fifo_block {
 } fifo_block;
 
 fifo_block* load(process_info** processes, int process_count);
+
+int initial_execution(fifo_block* head, int executed);
 
 int execute(fifo_block* head, int executed);
 

@@ -36,9 +36,11 @@ int main(int argc, char **argv)
 
     // Executing as Fifo
     fifo_block* processes_head = load(valid_processes, parse_result);
+    int initial_execution_result = initial_execution(processes_head, 0);
+    printf("\nExecuted %d commands\n", initial_execution_result);
+
     int execute_result = execute(processes_head, 0);
     
-    printf("\nExecuted %d commands\n", execute_result);
 }
 
 int parseconfig(char **commands_ref, process_info **parsed_processes, int command_count){

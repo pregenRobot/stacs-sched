@@ -7,6 +7,7 @@
 #include "fifo.h"
 #include <sys/wait.h>
 #include <unistd.h>
+#include <signal.h>
 
 fifo_block* load(process_info** processes, int process_count){
     int i = 0;
@@ -23,7 +24,7 @@ fifo_block* load(process_info** processes, int process_count){
     return head;
 }
 
-int execute(fifo_block* head, int executed){
+int initial_execution(fifo_block* head, int executed){
     fifo_block* current = head;
     
     if(current != NULL){
@@ -34,23 +35,34 @@ int execute(fifo_block* head, int executed){
             execl(current->info->executable_path, current->info->arguments);
         }else if (pid > 0){
             // parent
-            int status;
-            pid_t terminated;
-            terminated = waitpid(pid, &status, 0);
-            
-            // Schudler should allow this as well
-            // if(terminated == -1){
-            //     perror("child Terminated with error");
-            //     exit(1);
-            // }
+            kill(pid, SIGSTOP);
+            current->info->process_id = pid;
+            current->info->current_status = 0;
+            return initial_execution(current->next_block, executed) + 1;
+        }
+    }
+    return 0;
 
-            if(WIFEXITED(status)){
-                // run next block
-                return execute(current->next_block, executed + 1);
-            }else{
-                perror("Something waint wrong");
-                exit(1);
-            }
+}
+
+int execute(fifo_block* head, int executed){
+    fifo_block* current = head;
+    
+    if(current != NULL){
+        kill(current->info->process_id, SIGCONT);
+        current->info->current_status = 1;
+        int status;
+        int terminated = waitpid(current->info->process_id,&status, 0);
+        
+        // scheduler should allow child to terminate as well
+        // if(terminated == -1);
+
+        if(WIFEXITED(status)){
+            // run next block
+            return execute(current->next_block, executed) + 1;
+        }else{
+            perror("Something went wrong");
+            exit(1);
         }
     }
     return 0;
