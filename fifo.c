@@ -27,7 +27,7 @@ static int startup(fifo_block* head, int executed){
         int pid = fork();
         if(pid == 0){
             current->info->status = 1;
-            execl(current->info->executable_path, current->info->arguments);
+            execv(current->info->executable_path, current->info->arguments);
         }else if(pid > 1){
             kill(pid, SIGSTOP);
             current->info->process_id = pid;
