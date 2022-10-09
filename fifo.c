@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <sys/wait.h>
+#include <stdio.h>
 
 static fifo_block* load(pcb** pcbs, int pcb_count){
     int i = 0;
@@ -23,15 +24,15 @@ static fifo_block* load(pcb** pcbs, int pcb_count){
 static int startup(fifo_block* head, int executed){
     fifo_block* current = head;
     if(current != NULL){
-        pid_t pid = fork();
+        int pid = fork();
         if(pid == 0){
             current->info->status = 1;
             execl(current->info->executable_path, current->info->arguments);
-        }else if(pid > 0){
+        }else if(pid > 1){
             kill(pid, SIGSTOP);
-            current->info->process_id = 0;
+            current->info->process_id = pid;
             current->info->status = 0;
-            return fifo_startup(current->next, executed) + 1;
+            return startup(current->next, executed) + 1;
         }
     }
     return 0;
@@ -45,7 +46,7 @@ static int execute(fifo_block* head, int executed){
         int status;
         int terminated = waitpid(current->info->process_id, &status, 0);
         if(WIFEXITED(status)){
-            return fifo_execute(current->next, executed) + 1;
+            return execute(current->next, executed) + 1;
         }else{
             perror("Something went wrong");
             exit(1);
@@ -54,7 +55,7 @@ static int execute(fifo_block* head, int executed){
     return 0;
 }
 
-blocks* fifo_load(pcb** pcbs, int pcb_count){
+blocks* fifo_load(pcb** pcbs, int pcb_count, char** args){
     blocks* head_wrapper = malloc(sizeof(blocks));
     head_wrapper->fifo_head = load(pcbs, pcb_count);
     return head_wrapper;

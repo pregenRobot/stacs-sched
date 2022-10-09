@@ -17,7 +17,7 @@ static int execute(pq_block* head, int executed){
     return 0;
 }
 
-blocks* pq_load(pcb** pcbs, int pcb_count){
+blocks* pq_load(pcb** pcbs, int pcb_count, char** argv){
     blocks* head_wrapper = malloc(sizeof(blocks));
     head_wrapper->pq_head = load(pcbs, pcb_count);
     return head_wrapper;
