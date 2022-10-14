@@ -5,6 +5,7 @@
 #include <assert.h>
 #include "common.h"
 #include <inttypes.h>
+#include <libgen.h>
 
 #define LINE_MAX_LENGTH 1000
 
@@ -113,7 +114,8 @@ int parseconfig(char **commands_ref, pcb **pcbs, int command_count){
     int i;
     for(i = 0; i < command_count; i++){
         char *empty_line = '\n';
-        char* space = ' ';
+        const char* slash = '/';
+        const char* space = ' ';
         char *target_command = commands_ref[i];
         char *space_for_concat = " ";
 
@@ -135,9 +137,15 @@ int parseconfig(char **commands_ref, pcb **pcbs, int command_count){
         process->executable_path = (char*)malloc(sizeof(char)*LINE_MAX_LENGTH);
         process->executable_path = strdup(*(tokens+1));
 
-        process->arguments = (char*)malloc(sizeof(char) * LINE_MAX_LENGTH);
+        process->arguments = malloc(sizeof(char*) * LINE_MAX_LENGTH);
         char **arguments = (tokens+2);
-        process->arguments = join_strings(arguments, space_for_concat);
+        process->arguments[0] = basename(process->executable_path);
+        int argi = 1;
+        while(*arguments){
+            process->arguments[argi] = (arguments + (argi - 1));
+            argi+=1;
+            arguments = (arguments + 1);
+        }
         pcbs[p_i] = process;
         p_i++;
     }
@@ -158,10 +166,11 @@ char* join_strings(char **strings, char *separator){
 
 
 // https://stackoverflow.com/questions/9210528/split-string-with-delimiters-in-c
-char** str_split(char* a_str, const char a_delim)
+char** str_split(char* a_str, char a_delim)
 {
     char** result    = 0;
     size_t count     = 0;
+    a_str[strlen(a_str) - 1] = '\0';
     char* tmp        = a_str;
     char* last_comma = 0;
     char delim[2];
@@ -202,6 +211,5 @@ char** str_split(char* a_str, const char a_delim)
         assert(idx == count - 1);
         *(result + idx) = 0;
     }
-
     return result;
 }
