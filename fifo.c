@@ -27,12 +27,16 @@ static int startup(fifo_block* head, int executed){
         int pid = fork();
         if(pid == 0){
             current->info->status = 1;
-            execl(current->info->executable_path, current->info->arguments);
+            execv(current->info->executable_path, current->info->arguments);
         }else if(pid > 1){
             kill(pid, SIGSTOP);
+            printf("Command: %s  - pid: %d\n", current->info->executable_path, pid);
             current->info->process_id = pid;
             current->info->status = 0;
             return startup(current->next, executed) + 1;
+        }else{
+            printf("Fork failed.\n");
+            return startup(current->next, executed);
         }
     }
     return 0;

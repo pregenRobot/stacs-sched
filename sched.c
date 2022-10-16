@@ -8,6 +8,7 @@
 #include <libgen.h>
 
 #define LINE_MAX_LENGTH 1000
+#define NONE ((void *) 0)
 
 int main(int argc, char **argv){
 
@@ -111,6 +112,7 @@ int readconfig(char ***commands_ref, char* path)
 
 int parseconfig(char **commands_ref, pcb **pcbs, int command_count){
     int p_i = 0;
+
     int i;
     for(i = 0; i < command_count; i++){
         char *empty_line = '\n';
@@ -141,11 +143,11 @@ int parseconfig(char **commands_ref, pcb **pcbs, int command_count){
         char **arguments = (tokens+2);
         process->arguments[0] = basename(process->executable_path);
         int argi = 1;
-        while(*arguments){
-            process->arguments[argi] = (arguments + (argi - 1));
+        while(*(arguments + argi - 1) != NONE){
+            process->arguments[argi] = strdup(*(arguments + (argi - 1)));
             argi+=1;
-            arguments = (arguments + 1);
         }
+        process->arguments[argi] = NULL;
         pcbs[p_i] = process;
         p_i++;
     }
