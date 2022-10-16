@@ -7,7 +7,7 @@
 
 typedef struct {
     int process_id;
-    int status; // -1 finished 0 waiting 1 running
+    int status; // -2 finished (successfully or unsuccessfully) -1 loaded 0 waiting 1 running
     char *executable_path;
     char **arguments;
     int priority;

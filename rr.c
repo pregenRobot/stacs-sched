@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include <errno.h>
 #include <unistd.h>
+#include <stdio.h>
 
 
 static rr_block* load(pcb** pcbs, int pcb_count, int quantum){
@@ -35,38 +36,10 @@ static int startup(rr_block* head, int executed){
             execv(current->info->executable_path, current->info->arguments);
         }else{
             kill(pid, SIGSTOP);
+            printf("Command: %s  - pid: %d\n", current->info->executable_path, pid);
             current->info->process_id = pid;
             current->info->status = 0;
             return startup(current->next, executed) + 1;
-        }
-    }
-    return 0;
-}
-
-static int execute(rr_block* head, int executed){
-    rr_block* current = head;
-    if(current != NULL){
-        if(current->info->status == 0){// If process is waiting to be executed
-            kill(current->info->process_id, SIGCONT);
-            current->info->status = 1;
-            int status;
-            int terminated = waitpid(current->info->process_id, &status, WNOHANG);
-            if (terminated == 0){
-                usleep((__useconds_t)current->quantum);
-                kill(current->info->process_id, SIGSTOP);
-                current->info->status = 0;
-                return execute(current->next, executed);
-            }else{
-                if(WIFEXITED(status)){
-                    return startup(current->next, executed) + 1;
-                }else{
-                    perror("Something went wrong");
-                    exit(1);
-                }
-            }
-        }else{
-            //Move on to next process
-            return execute(current->next, executed) + 1;
         }
     }
     return 0;
@@ -81,6 +54,31 @@ blocks* rr_load(pcb** pcbs, int pcb_count, char** args){
 
 int rr_startup(blocks* b, int commands){
     return startup(b->rr_head, 0);
+}
+
+static int execute(rr_block* head, int executed){
+    rr_block* current = head;
+    if(current != NULL){// While we are not at the end of the list of processes
+        if(current->info->status == 0){
+            //If process has not finished executing (verify from status)
+            kill(current->info->process_id, SIGCONT);
+            current->info->status = 1;
+            int status;
+            int waiting_result = waitpid(current->info->process_id, &status, WNOHANG);
+            usleep((__useconds_t)current->quantum);
+            kill(current->info->process_id, SIGSTOP);
+            if(waiting_result == 0){  // child is still running
+                current->info->status = 0;
+                return execute(current->next, executed);
+            }else if (waiting_result == current->info->process_id){ // child has finished executing
+                current->info->status = -2;
+                return execute(current->next,executed) + 1;
+            }
+        }else{
+            return execute(current->next,executed) + 1;
+        }
+    }
+    return 0;
 }
 
 int rr_execute(blocks* b, int commands){
