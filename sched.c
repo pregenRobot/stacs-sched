@@ -107,7 +107,7 @@ int readconfig(char ***commands_ref, char* path)
     int n_rows = 0;
     int n_cols = 0;
     int length = 0;
-    char line[LINE_MAX_LENGTH];
+    char* line = malloc(LINE_MAX_LENGTH * sizeof(char));
     while (fgets(line, LINE_MAX_LENGTH, fp) != NULL)
     {
         n_rows++;
@@ -125,7 +125,7 @@ int readconfig(char ***commands_ref, char* path)
     while (fgets(line, LINE_MAX_LENGTH, fp) != NULL)
     {
         (*commands_ref)[i] = malloc((n_cols + 1) * sizeof(char));
-        strcpy((*commands_ref)[i], &line);
+        strcpy((*commands_ref)[i], line);
         i++;
     }
 
@@ -139,16 +139,14 @@ int parseconfig(char **commands_ref, pcb **pcbs, int command_count){
 
     int i;
     for(i = 0; i < command_count; i++){
-        char *empty_line = '\n';
-        const char* slash = '/';
-        const char* space = ' ';
+        char *empty_line = "\n";
+        const char* slash = (char*)'/';
         char *target_command = commands_ref[i];
-        char *space_for_concat = " ";
 
-        if(strcmp(target_command, &empty_line) == 0){
+        if(strcmp(target_command, empty_line) == 0){
             continue;
         }
-        char ** tokens = str_split(target_command, space);
+        char ** tokens = str_split(target_command, ' ');
         if(!*(tokens) || !*(tokens+1) || !isNumeric(*tokens)){
             printf("\nConfig file has invalid line at %d\n", i+1);
             continue;

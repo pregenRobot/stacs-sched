@@ -31,7 +31,7 @@ static rr_block* load(pcb** pcbs, int pcb_count, int quantum){
 }
 
 static int startup(rr_block* head, int executed){
-    fifo_block* current = head;
+    rr_block* current = head;
 
 
     if(current != NULL){

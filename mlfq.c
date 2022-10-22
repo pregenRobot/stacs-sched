@@ -26,9 +26,9 @@ blocks* mlfq_load(pcb** pcbs, int pcb_count, char** argv){
 }
 
 int mlfq_startup(blocks* b, int executed){
-    return startup(b->fifo_head, executed);
+    return startup(b->mlfq_head, executed);
 }
 
 int mlfq_execute(blocks* b, int executed){
-    return execute(b->fifo_head, executed);
+    return execute(b->mlfq_head, executed);
 }
