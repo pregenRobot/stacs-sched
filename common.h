@@ -1,14 +1,15 @@
 #ifndef common
 #define common
 
+#include <signal.h>
 #include <stdbool.h>
 #include <sys/types.h>
-#include <signal.h>
 #include <time.h>
 
 typedef struct {
     int process_id;
-    int status; // -2 finished (successfully or unsuccessfully) -1 loaded 0 waiting 1 running
+    int status; // -2 finished (successfully or unsuccessfully) -1 loaded 0
+                // waiting 1 running
     char *executable_path;
     char **arguments;
     int arg_count; // number of arguments -- for freeing
@@ -24,7 +25,7 @@ typedef struct {
 // FIFO
 typedef struct fifo_block {
     pcb *info;
-    struct fifo_block* next;
+    struct fifo_block *next;
 } fifo_block;
 
 // mlfq
@@ -49,42 +50,36 @@ typedef struct blocks {
 
 // Implementations for each scheduler
 // FIFO - First in first Out
-blocks* fifo_load(pcb** pcbs, int pcb_count, char** args);
-int fifo_startup(blocks* b, int executed);
-int fifo_execute(blocks* b, int executed);
+blocks *fifo_load(pcb **pcbs, int pcb_count, char **args);
+int fifo_startup(blocks *b, int executed);
+int fifo_execute(blocks *b, int executed);
 
 // Priority Queue - Maxheap
-blocks* rr_load(pcb** pcbs, int pcb_count, char** args);
-int rr_startup(blocks* b, int executed);
-int rr_execute(blocks* b, int executed);
+blocks *rr_load(pcb **pcbs, int pcb_count, char **args);
+int rr_startup(blocks *b, int executed);
+int rr_execute(blocks *b, int executed);
 
 // Priority Queue - Maxheap
-blocks* mlfq_load(pcb** pcbs, int pcb_count, char** args);
-int mlfq_startup(blocks* b, int executed);
-int mlfq_execute(blocks* b, int executed);
+blocks *mlfq_load(pcb **pcbs, int pcb_count, char **args);
+int mlfq_startup(blocks *b, int executed);
+int mlfq_execute(blocks *b, int executed);
 
 // Parsers and configurers
-int readconfig(char ***commands_ref, char* path);
+int readconfig(char ***commands_ref, char *path);
 int parseconfig(char **commands_ref, pcb **pcbs, int command_count);
-char** str_split(char *a_str, const char a_delim);
-char* join_strings(char **strings, char *separator);
-bool isNumeric(const char* s);
+char **str_split(char *a_str, const char a_delim);
+char *join_strings(char **strings, char *separator);
+bool isNumeric(const char *s);
 
 typedef struct scheduler {
-    blocks* (*loader)(pcb**, int, char**);
-    int(*starter)(blocks*, int);
-    int(*executor)(blocks*, int);
+    blocks *(*loader)(pcb **, int, char **);
+    int (*starter)(blocks *, int);
+    int (*executor)(blocks *, int);
 } scheduler;
 
-int handle_args(
-    scheduler* target_scheduler,
-    int argc,
-    char** argv
-);
-int log_stats(
-    pcb **pcbs,
-    int pcb_count
-);
+int handle_args(scheduler *target_scheduler, int argc, char **argv);
+int log_stats(pcb **pcbs, int pcb_count);
 
-void free_all(scheduler* target_scheduler, pcb **pcbs, int pcb_count, blocks* head, char** commands, int command_count);
+void free_all(scheduler *target_scheduler, pcb **pcbs, int pcb_count,
+              blocks *head, char **commands, int command_count);
 #endif
