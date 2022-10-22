@@ -22,7 +22,7 @@ int main(int argc, char **argv){
         exit(1);
     }
 
-    scheduler *target_scheduler = malloc(sizeof(scheduler));
+    scheduler *target_scheduler = malloc(sizeof(scheduler)); // free OK
 
     if(handle_args(target_scheduler, argc, argv) == -1){
         printf("Error with configuration\n");
@@ -33,7 +33,7 @@ int main(int argc, char **argv){
     int command_count =readconfig(&commands,argv[1]);
     for (int i = 0; i < command_count; i++) printf("Command: %s", commands[i]);
 
-    pcb **pcbs = malloc(command_count*sizeof(pcb*));
+    pcb **pcbs = malloc(command_count*sizeof(pcb*)); // free OK
     int parse_count = parseconfig(commands, pcbs, command_count);
     printf("Read %d and parsed %d command lines. Schduler running on cpu %d\n", command_count, parse_count, sched_getcpu());
     if(parse_count == 0){
@@ -45,7 +45,22 @@ int main(int argc, char **argv){
     int startup_result = (target_scheduler->starter)(head, parse_count);
     int execute_result = (target_scheduler->executor)(head, parse_count);
     log_stats(pcbs, parse_count);
+    
+    free_all(target_scheduler, pcbs, parse_count, head, commands, command_count);
     return 0;
+}
+
+void free_all(scheduler *target_scheduler, pcb **pcbs, int pcb_count, blocks* head, char** commands, int command_count){
+    free(target_scheduler);
+    int i;
+    for(i = 0; i < pcb_count; i++){
+        free(pcbs[i]->executable_path);
+        free(pcbs[i]->arguments);
+        free(pcbs[i]->full_line);
+        free(pcbs[i]);
+    }
+    free(pcbs);
+    free(commands);
 }
 
 int log_stats( pcb **pcbs, int pcb_count){
@@ -107,7 +122,7 @@ int readconfig(char ***commands_ref, char* path)
     int n_rows = 0;
     int n_cols = 0;
     int length = 0;
-    char* line = malloc(LINE_MAX_LENGTH * sizeof(char));
+    char* line = malloc(LINE_MAX_LENGTH * sizeof(char)); // free OK
     while (fgets(line, LINE_MAX_LENGTH, fp) != NULL)
     {
         n_rows++;
@@ -120,16 +135,17 @@ int readconfig(char ***commands_ref, char* path)
 
     // Load file onto memory
     rewind(fp);
-    *commands_ref = malloc(n_rows * sizeof(char *));
+    *commands_ref = malloc(n_rows * sizeof(char *)); // free OK
     int i = 0;
     while (fgets(line, LINE_MAX_LENGTH, fp) != NULL)
     {
         (*commands_ref)[i] = malloc((n_cols + 1) * sizeof(char));
-        strcpy((*commands_ref)[i], line);
+        strcpy((*commands_ref)[i], line); // free OK
         i++;
     }
 
     // Cleanup
+    free(line);
     fclose(fp);
     return n_rows;
 }
@@ -152,16 +168,16 @@ int parseconfig(char **commands_ref, pcb **pcbs, int command_count){
             continue;
         }
 
-        pcb *process = (pcb*)malloc(sizeof(pcb));
+        pcb *process = (pcb*)malloc(sizeof(pcb)); // free OK
 
         process->process_id = -1;
         process->status = 0;
         process->priority = (int)((uintmax_t) strtoumax(*tokens, NULL, 10));
 
-        process->executable_path = (char*)malloc(sizeof(char)*LINE_MAX_LENGTH);
+        process->executable_path = (char*)malloc(sizeof(char)*LINE_MAX_LENGTH); // free OK
         process->executable_path = strdup(*(tokens+1));
 
-        process->arguments = malloc(sizeof(char*) * LINE_MAX_LENGTH);
+        process->arguments = malloc(sizeof(char*) * LINE_MAX_LENGTH); // free OK
         if(*(tokens + 2)){
             char **arguments = (tokens+2);
             process->arguments[0] = basename(process->executable_path);
@@ -170,11 +186,13 @@ int parseconfig(char **commands_ref, pcb **pcbs, int command_count){
                 process->arguments[argi] = strdup(*(arguments + (argi - 1)));
                 argi+=1;
             }
+            process->arg_count = argi;
             process->arguments[argi] = NULL;
         }
         process->full_line = commands_ref[i];
         pcbs[p_i] = process;
         p_i++;
+        free(tokens);
     }
     return p_i;
 }
@@ -187,18 +205,6 @@ bool isNumeric(const char* s){
         ++s;
     }
     return true;
-}
-
-char* join_strings(char **strings, char *separator){
-    char *str = (char*) malloc(sizeof(str) * LINE_MAX_LENGTH);
-    str[0] = '\0';
-
-    int i = 0;
-    for(i = 0; *(strings+i); i++){
-        strcat(str, strdup(*(strings+i)));
-        strcat(str, strdup(separator));
-    }
-    return str;
 }
 
 
@@ -232,7 +238,7 @@ char** str_split(char* a_str, char a_delim)
        knows where the list of returned strings ends. */
     count++;
 
-    result = malloc(sizeof(char*) * count);
+    result = malloc(sizeof(char*) * count); // free all
 
     if (result)
     {

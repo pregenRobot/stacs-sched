@@ -11,9 +11,9 @@ typedef struct {
     int status; // -2 finished (successfully or unsuccessfully) -1 loaded 0 waiting 1 running
     char *executable_path;
     char **arguments;
+    int arg_count; // number of arguments -- for freeing
     int priority;
     char *full_line;
-
     int64_t begin;
     int64_t response_time;
     int64_t burst_time;
@@ -85,4 +85,6 @@ int log_stats(
     pcb **pcbs,
     int pcb_count
 );
+
+void free_all(scheduler* target_scheduler, pcb **pcbs, int pcb_count, blocks* head, char** commands, int command_count);
 #endif
