@@ -8,6 +8,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <time.h>
 
 
 static rr_block* load(pcb** pcbs, int pcb_count, int quantum){
@@ -39,6 +40,8 @@ static int startup(rr_block* head, int executed){
             printf("Command: %s  - pid: %d\n", current->info->executable_path, pid);
             current->info->process_id = pid;
             current->info->status = 0;
+            current->info->response_time = -1;
+            current->info->begin = clock();
             return startup(current->next, executed) + 1;
         }
     }

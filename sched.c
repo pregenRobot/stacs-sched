@@ -27,9 +27,17 @@ int main(int argc, char **argv){
     blocks* head = (target_scheduler->loader)(pcbs, parse_count,&(argv[3]));
     int startup_result = (target_scheduler->starter)(head, parse_count);
     int execute_result = (target_scheduler->executor)(head, parse_count);
-
+    log_stats(pcbs, parse_count);
     return 0;
 }
+
+int log_stats( pcb **pcbs, int pcb_count){
+    int i;
+    for(i = 0; i < pcb_count; i++){
+        printf("\nStats for %s : response_time - %lf burst_time - %lf turnaround_time - %lf waiting_time - %lf\n", pcbs[i]->full_line, pcbs[i]->response_time, pcbs[i]->burst_time, pcbs[i]->turnaround_time, pcbs[i]->waiting_time);
+    }
+}
+
 
 int handle_args(
     scheduler* target_scheduler,
@@ -148,6 +156,7 @@ int parseconfig(char **commands_ref, pcb **pcbs, int command_count){
             argi+=1;
         }
         process->arguments[argi] = NULL;
+        process->full_line = commands_ref[i];
         pcbs[p_i] = process;
         p_i++;
     }

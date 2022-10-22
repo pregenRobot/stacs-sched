@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <sys/types.h>
 #include <signal.h>
+#include <time.h>
 
 typedef struct {
     int process_id;
@@ -11,6 +12,13 @@ typedef struct {
     char *executable_path;
     char **arguments;
     int priority;
+    char *full_line;
+
+    clock_t begin;
+    double response_time;
+    double burst_time;
+    double turnaround_time;
+    double waiting_time;
 } pcb; // process control block
 
 // FIFO
@@ -71,5 +79,9 @@ int handle_args(
     scheduler* target_scheduler,
     int argc,
     char** argv
+);
+int log_stats(
+    pcb **pcbs,
+    int pcb_count
 );
 #endif

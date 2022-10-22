@@ -54,7 +54,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/sched",
-            "args": ["/home/maat1/Documents/cs3104/P1-Scheduler/submission/exec.conf","rr", "1000"],
+            "args": ["/home/maat1/Documents/cs3104/P1-Scheduler/submission/exec-video.conf","rr", "1000"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],
