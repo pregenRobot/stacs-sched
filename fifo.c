@@ -5,7 +5,8 @@
 #include <signal.h>
 #include <sys/wait.h>
 #include <stdio.h>
-#include <time.h>
+#include "timer.h"
+#include <sched.h>
 
 static fifo_block* load(pcb** pcbs, int pcb_count){
     int i = 0;
@@ -31,12 +32,11 @@ static int startup(fifo_block* head, int executed){
             execv(current->info->executable_path, current->info->arguments);
         }else if(pid > 1){
             kill(pid, SIGSTOP);
-            printf("Command: %s  - pid: %d\n", current->info->executable_path, pid);
+            printf("Command: %s  - pid: %d - cpu: %d\n", current->info->executable_path, pid, sched_getcpu());
 
             current->info->process_id = pid;
             current->info->status = 0;
-            current->info->response_time = -1;
-            current->info->begin = clock();
+            log_startup(current->info);
 
             return startup(current->next, executed) + 1;
         }else{
@@ -50,21 +50,17 @@ static int startup(fifo_block* head, int executed){
 static int execute(fifo_block* head, int executed){
     fifo_block* current = head;
     if(current != NULL){
-        clock_t burst_start = clock();
+
+        log_execute_start(current->info);
         kill(current->info->process_id, SIGCONT);
         current->info->status = 1;
         int status;
-        if(current->info->response_time == -1){
-            current->info->response_time = clock() - current->info->begin;
-        }
         int terminated = waitpid(current->info->process_id, &status, 0);
-        if(WIFEXITED(status)){
-            
-            clock_t burst_end = clock();
-            current->info->turnaround_time = burst_end - current->info->begin;
-            current->info->burst_time = burst_end - burst_start;
-            current->info->waiting_time = current->info->turnaround_time - current->info->burst_time;
 
+        int64_t burst_end = micros();
+
+        if(WIFEXITED(status)){
+            log_execute_finish(current->info);
             return execute(current->next, executed) + 1;
         }else{
             perror("Something went wrong");

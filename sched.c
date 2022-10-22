@@ -6,23 +6,40 @@
 #include "common.h"
 #include <inttypes.h>
 #include <libgen.h>
+#include <inttypes.h>
+#include <sched.h>
 
 #define LINE_MAX_LENGTH 1000
 #define NONE ((void *) 0)
 
 int main(int argc, char **argv){
 
+    cpu_set_t mask;
+    CPU_ZERO(&mask);
+    CPU_SET(0, &mask);
+    if (sched_setaffinity(0, sizeof(cpu_set_t), &mask) == -1) {
+        printf("sched_setaffinity");
+        exit(1);
+    }
+
     scheduler *target_scheduler = malloc(sizeof(scheduler));
 
-    handle_args(target_scheduler, argc, argv);
+    if(handle_args(target_scheduler, argc, argv) == -1){
+        printf("Error with configuration\n");
+        exit(1);
+    }
     
     char **commands;
     int command_count =readconfig(&commands,argv[1]);
-    printf("Read %d command lines\n", command_count);
     for (int i = 0; i < command_count; i++) printf("Command: %s", commands[i]);
 
     pcb **pcbs = malloc(command_count*sizeof(pcb*));
     int parse_count = parseconfig(commands, pcbs, command_count);
+    printf("Read %d and parsed %d command lines. Schduler running on cpu %d\n", command_count, parse_count, sched_getcpu());
+    if(parse_count == 0){
+        printf("No runnable configurations found. Exiting...\n");
+        exit(0);
+    }
 
     blocks* head = (target_scheduler->loader)(pcbs, parse_count,&(argv[3]));
     int startup_result = (target_scheduler->starter)(head, parse_count);
@@ -34,7 +51,7 @@ int main(int argc, char **argv){
 int log_stats( pcb **pcbs, int pcb_count){
     int i;
     for(i = 0; i < pcb_count; i++){
-        printf("\nStats for %s : response_time - %lf burst_time - %lf turnaround_time - %lf waiting_time - %lf\n", pcbs[i]->full_line, pcbs[i]->response_time, pcbs[i]->burst_time, pcbs[i]->turnaround_time, pcbs[i]->waiting_time);
+        printf("\nStats for %s | response_time: %d burst_time: %d turnaround_time: %d waiting_time: %d\n", pcbs[i]->full_line, pcbs[i]->response_time, pcbs[i]->burst_time, pcbs[i]->turnaround_time, pcbs[i]->waiting_time);
     }
 }
 
@@ -45,13 +62,13 @@ int handle_args(
     char** argv
 ){
     if(argc < 3){
-        perror("Arguments not supplied ./sched {exec.conf path} {scheduler:fifo,pq,rr} {scheduler args}");
-        exit(1);
+        printf("Arguments not supplied ./sched {exec.conf path} {scheduler:fifo,mlfq,rr} {scheduler args}\n");
+        return -1;
     }
 
-    if(argc == 3 && argv[2] == "rr"){
-        perror("RR scheduler -- Round-robing scheduling requires quantum as second argument");
-        exit(1);
+    if(argc == 3 && (int)strcmp(argv[2], "rr") == 0){
+        printf("RR scheduler -- Round-robing scheduling requires quantum as second argument\n");
+        return -1;
     }
 
     if(argc == 3 && (int)strcmp(argv[2],"fifo") == 0){
@@ -59,20 +76,19 @@ int handle_args(
         target_scheduler->executor = fifo_execute;
         target_scheduler->starter = fifo_startup;
         return 0;
-    }
-
-    if(argc == 3 && (int)strcmp(argv[2], "pq") == 0){
-        target_scheduler->loader = pq_load;
-        target_scheduler->executor = pq_execute;
-        target_scheduler->starter = pq_startup;
+    } else if(argc == 3 && (int)strcmp(argv[2], "mlfq") == 0){
+        target_scheduler->loader = mlfq_load;
+        target_scheduler->executor = mlfq_execute;
+        target_scheduler->starter = mlfq_startup;
         return 0;
-    }
-
-    if (argc == 4 && (int)strcmp(argv[2], "rr") == 0){
+    }else if (argc == 4 && (int)strcmp(argv[2], "rr") == 0){
         target_scheduler->loader = rr_load;
         target_scheduler->executor = rr_execute;
         target_scheduler->starter = rr_startup;
         return 0;
+    }else{
+        printf("Invalid scheduler");
+        return -1;
     }
 }
 
@@ -83,8 +99,8 @@ int readconfig(char ***commands_ref, char* path)
     FILE *fp = fopen(path, "read");
     if (fp == NULL)
     {
-        printf("Error: Config file not found");
-        return -1;
+        printf("Error: Config file not found\n");
+        exit(1);
     }
 
     // Count max rows and cols of the file to be read
@@ -133,8 +149,8 @@ int parseconfig(char **commands_ref, pcb **pcbs, int command_count){
             continue;
         }
         char ** tokens = str_split(target_command, space);
-        if(!*(tokens) || !*(tokens+1) || !*(tokens + 2)){
-            printf("\nInvalid line at %d\n", i);
+        if(!*(tokens) || !*(tokens+1) || !*(tokens + 2) || !isNumeric(*tokens)){
+            printf("\nConfig file has invalid line at %d\n", i+1);
             continue;
         }
 
@@ -161,6 +177,16 @@ int parseconfig(char **commands_ref, pcb **pcbs, int command_count){
         p_i++;
     }
     return p_i;
+}
+
+// https://stackoverflow.com/questions/16644906/how-to-check-if-a-string-is-a-number
+bool isNumeric(const char* s){
+    while(*s){
+        if(*s < '0' || *s > '9')
+            return false;
+        ++s;
+    }
+    return true;
 }
 
 char* join_strings(char **strings, char *separator){

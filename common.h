@@ -14,11 +14,11 @@ typedef struct {
     int priority;
     char *full_line;
 
-    clock_t begin;
-    double response_time;
-    double burst_time;
-    double turnaround_time;
-    double waiting_time;
+    int64_t begin;
+    int64_t response_time;
+    int64_t burst_time;
+    int64_t turnaround_time;
+    int64_t waiting_time;
 } pcb; // process control block
 
 // FIFO
@@ -27,12 +27,12 @@ typedef struct fifo_block {
     struct fifo_block* next;
 } fifo_block;
 
-// PQ
-typedef struct pq_block {
+// mlfq
+typedef struct mlfq_block {
     pcb *info;
-    struct pq_block *left;
-    struct pq_block *right;
-} pq_block;
+    struct mlfq_block *left;
+    struct mlfq_block *right;
+} mlfq_block;
 
 typedef struct rr_block {
     pcb *info;
@@ -40,10 +40,10 @@ typedef struct rr_block {
     int quantum;
 } rr_block;
 
-// wrapper for FIFO and PQ data structures for inheritance
+// wrapper for FIFO and mlfq data structures for inheritance
 typedef struct blocks {
     fifo_block *fifo_head;
-    pq_block *pq_head;
+    mlfq_block *mlfq_head;
     rr_block *rr_head;
 } blocks;
 
@@ -59,15 +59,16 @@ int rr_startup(blocks* b, int executed);
 int rr_execute(blocks* b, int executed);
 
 // Priority Queue - Maxheap
-blocks* pq_load(pcb** pcbs, int pcb_count, char** args);
-int pq_startup(blocks* b, int executed);
-int pq_execute(blocks* b, int executed);
+blocks* mlfq_load(pcb** pcbs, int pcb_count, char** args);
+int mlfq_startup(blocks* b, int executed);
+int mlfq_execute(blocks* b, int executed);
 
 // Parsers and configurers
 int readconfig(char ***commands_ref, char* path);
 int parseconfig(char **commands_ref, pcb **pcbs, int command_count);
 char** str_split(char *a_str, const char a_delim);
 char* join_strings(char **strings, char *separator);
+bool isNumeric(const char* s);
 
 typedef struct scheduler {
     blocks* (*loader)(pcb**, int, char**);
