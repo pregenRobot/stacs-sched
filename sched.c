@@ -64,6 +64,7 @@ void free_all(scheduler *target_scheduler, pcb **pcbs, int pcb_count,
     free(commands);
     target_scheduler->free_blocks(head);
     free(target_scheduler);
+    free(head);
 }
 
 int log_stats(pcb **pcbs, int pcb_count) {

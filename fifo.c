@@ -10,11 +10,11 @@
 
 static fifo_block *load(pcb **pcbs, int pcb_count) {
     int i = 0;
-    fifo_block *head = malloc(sizeof(fifo_block));
+    fifo_block *head = malloc(sizeof(fifo_block)); // free OK
     head->info = pcbs[0];
     fifo_block *current = head;
     for (i = 1; i < pcb_count; i++) {
-        fifo_block *next = malloc(sizeof(fifo_block));
+        fifo_block *next = malloc(sizeof(fifo_block)); // free OK
         current->next = next;
         current = current->next;
         current->info = pcbs[i];
@@ -80,7 +80,7 @@ static int execute(fifo_block *head, int executed) {
 
 
 blocks *fifo_load(pcb **pcbs, int pcb_count, char **args) {
-    blocks *head_wrapper = malloc(sizeof(blocks));
+    blocks *head_wrapper = malloc(sizeof(blocks)); // free OK
     head_wrapper->fifo_head = load(pcbs, pcb_count);
     return head_wrapper;
 }
