@@ -23,6 +23,13 @@ static fifo_block *load(pcb **pcbs, int pcb_count) {
     return head;
 }
 
+static void free_blocks(fifo_block* head){
+    if(head != NULL){
+        free_blocks(head->next);
+        free(head);
+    }
+}
+
 static int startup(fifo_block *head, int executed) {
     fifo_block *current = head;
     if (current != NULL) {
@@ -39,7 +46,6 @@ static int startup(fifo_block *head, int executed) {
             current->info->process_id = pid;
             current->info->status = 0;
             log_startup(current->info);
-
             return startup(current->next, executed) + 1;
         } else {
             printf("Fork failed.\n");
@@ -72,6 +78,7 @@ static int execute(fifo_block *head, int executed) {
     return 0;
 }
 
+
 blocks *fifo_load(pcb **pcbs, int pcb_count, char **args) {
     blocks *head_wrapper = malloc(sizeof(blocks));
     head_wrapper->fifo_head = load(pcbs, pcb_count);
@@ -80,6 +87,10 @@ blocks *fifo_load(pcb **pcbs, int pcb_count, char **args) {
 
 int fifo_startup(blocks *b, int executed) {
     return startup(b->fifo_head, executed);
+}
+
+void fifo_free_blocks(blocks* b){
+    free_blocks(b->fifo_head);
 }
 
 int fifo_execute(blocks *b, int executed) {

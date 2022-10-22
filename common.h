@@ -53,16 +53,19 @@ typedef struct blocks {
 blocks *fifo_load(pcb **pcbs, int pcb_count, char **args);
 int fifo_startup(blocks *b, int executed);
 int fifo_execute(blocks *b, int executed);
+void fifo_free_blocks(blocks *b);
 
 // Priority Queue - Maxheap
 blocks *rr_load(pcb **pcbs, int pcb_count, char **args);
 int rr_startup(blocks *b, int executed);
 int rr_execute(blocks *b, int executed);
+void rr_free_blocks(blocks* b);
 
 // Priority Queue - Maxheap
 blocks *mlfq_load(pcb **pcbs, int pcb_count, char **args);
 int mlfq_startup(blocks *b, int executed);
 int mlfq_execute(blocks *b, int executed);
+void mlfq_free_blocks(blocks *b);
 
 // Parsers and configurers
 int readconfig(char ***commands_ref, char *path);
@@ -75,6 +78,7 @@ typedef struct scheduler {
     blocks *(*loader)(pcb **, int, char **);
     int (*starter)(blocks *, int);
     int (*executor)(blocks *, int);
+    void (*free_blocks)(blocks*);
 } scheduler;
 
 int handle_args(scheduler *target_scheduler, int argc, char **argv);

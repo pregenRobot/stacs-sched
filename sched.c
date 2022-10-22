@@ -53,7 +53,6 @@ int main(int argc, char **argv) {
 
 void free_all(scheduler *target_scheduler, pcb **pcbs, int pcb_count,
               blocks *head, char **commands, int command_count) {
-    free(target_scheduler);
     int i;
     for (i = 0; i < pcb_count; i++) {
         free(pcbs[i]->executable_path);
@@ -63,6 +62,8 @@ void free_all(scheduler *target_scheduler, pcb **pcbs, int pcb_count,
     }
     free(pcbs);
     free(commands);
+    target_scheduler->free_blocks(head);
+    free(target_scheduler);
 }
 
 int log_stats(pcb **pcbs, int pcb_count) {
@@ -94,6 +95,7 @@ int handle_args(scheduler *target_scheduler, int argc, char **argv) {
         target_scheduler->loader = fifo_load;
         target_scheduler->executor = fifo_execute;
         target_scheduler->starter = fifo_startup;
+        target_scheduler->free_blocks = fifo_free_blocks;
         return 0;
     } else if (argc == 3 && (int)strcmp(argv[2], "mlfq") == 0) {
         target_scheduler->loader = mlfq_load;
@@ -104,6 +106,7 @@ int handle_args(scheduler *target_scheduler, int argc, char **argv) {
         target_scheduler->loader = rr_load;
         target_scheduler->executor = rr_execute;
         target_scheduler->starter = rr_startup;
+        target_scheduler->free_blocks = rr_free_blocks;
         return 0;
     } else {
         printf("Invalid scheduler");
