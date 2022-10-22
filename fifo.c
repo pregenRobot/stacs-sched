@@ -5,7 +5,7 @@
 #include <signal.h>
 #include <sys/wait.h>
 #include <stdio.h>
-#include "timer.h"
+#include "utility.h"
 #include <sched.h>
 
 static fifo_block* load(pcb** pcbs, int pcb_count){
@@ -29,7 +29,8 @@ static int startup(fifo_block* head, int executed){
         int pid = fork();
         if(pid == 0){
             current->info->status = 1;
-            execv(current->info->executable_path, current->info->arguments);
+            
+            execvp(current->info->executable_path, current->info->arguments);
         }else if(pid > 1){
             kill(pid, SIGSTOP);
             printf("Command: %s  - pid: %d - cpu: %d\n", current->info->executable_path, pid, sched_getcpu());

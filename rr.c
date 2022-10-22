@@ -8,7 +8,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <stdio.h>
-#include "timer.h"
+#include "utility.h"
 #include <sched.h>
 
 
@@ -35,10 +35,17 @@ static int startup(rr_block* head, int executed){
 
 
     if(current != NULL){
+
+        if(!command_is_executable(current->info->executable_path)){
+            printf("Cannot find executable %s - file does not exist and it is not in PATH. Skipping...", current->info->executable_path);
+            current->info->status = -2;
+            return startup(current->next, executed) + 1;
+        }
+
         int pid = fork();
         if(pid == 0){
             current->info->status = 1;
-            execv(current->info->executable_path, current->info->arguments);
+            execvp(current->info->executable_path, current->info->arguments);
         }else{
             kill(pid, SIGSTOP);
             printf("Command: %s  - pid: %d - cpu: %d\n", current->info->executable_path, pid, sched_getcpu());

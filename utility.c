@@ -1,7 +1,12 @@
 #include <time.h>
 #include <stdint.h>
 #include "common.h"
-
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 /// Convert seconds to milliseconds
 #define SEC_TO_MS(sec) ((sec)*1000)
 /// Convert seconds to microseconds
@@ -68,4 +73,16 @@ void log_execute_finish(pcb *pcb_info){
     pcb_info->turnaround_time = burst_end - pcb_info->begin;
     pcb_info->burst_time+= burst_end - burst_start;
     pcb_info->waiting_time = pcb_info->turnaround_time - pcb_info->burst_time;
+}
+
+// https://stackoverflow.com/questions/890894/portable-way-to-find-out-if-a-command-exists-c-c
+bool command_is_executable(char* command){
+    char whichcommand[strlen(command) + 25];
+    sprintf(whichcommand, "which %s > /dev/null 2>&1",command);
+    if(system(whichcommand) == 0){
+        // command exists in path
+        return true;
+    }else{
+        return false;
+    }
 }

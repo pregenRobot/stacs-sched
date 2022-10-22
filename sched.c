@@ -149,7 +149,7 @@ int parseconfig(char **commands_ref, pcb **pcbs, int command_count){
             continue;
         }
         char ** tokens = str_split(target_command, space);
-        if(!*(tokens) || !*(tokens+1) || !*(tokens + 2) || !isNumeric(*tokens)){
+        if(!*(tokens) || !*(tokens+1) || !isNumeric(*tokens)){
             printf("\nConfig file has invalid line at %d\n", i+1);
             continue;
         }
@@ -164,14 +164,16 @@ int parseconfig(char **commands_ref, pcb **pcbs, int command_count){
         process->executable_path = strdup(*(tokens+1));
 
         process->arguments = malloc(sizeof(char*) * LINE_MAX_LENGTH);
-        char **arguments = (tokens+2);
-        process->arguments[0] = basename(process->executable_path);
-        int argi = 1;
-        while(*(arguments + argi - 1) != NONE){
-            process->arguments[argi] = strdup(*(arguments + (argi - 1)));
-            argi+=1;
+        if(*(tokens + 2)){
+            char **arguments = (tokens+2);
+            process->arguments[0] = basename(process->executable_path);
+            int argi = 1;
+            while(*(arguments + argi - 1) != NONE){
+                process->arguments[argi] = strdup(*(arguments + (argi - 1)));
+                argi+=1;
+            }
+            process->arguments[argi] = NULL;
         }
-        process->arguments[argi] = NULL;
         process->full_line = commands_ref[i];
         pcbs[p_i] = process;
         p_i++;
