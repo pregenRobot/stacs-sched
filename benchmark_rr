@@ -1,0 +1,9 @@
+# !/bin/bash
+
+echo "running quantum $1 at $$"
+mkdir "rr_benchmark/quantum_$1"
+for j in {1..10}
+do
+    ./sched exec.conf rr $1 > "rr_benchmark/quantum_$1/run_$j.txt"
+done
+echo "done quantum $1 "

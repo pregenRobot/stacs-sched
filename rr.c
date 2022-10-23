@@ -67,16 +67,6 @@ static void free_blocks(rr_block* head){
     }
 }
 
-blocks *rr_load(pcb **pcbs, int pcb_count, char **args) {
-    blocks *head_wrapper = malloc(sizeof(blocks)); // free OK
-    int quantum = (int)((uintmax_t)strtoumax(args[0], NULL, 10));
-    if (quantum <= 0) {
-        printf("Invalid quantum for RR scheduler\n");
-        exit(1);
-    }
-    head_wrapper->rr_head = load(pcbs, pcb_count, quantum);
-    return head_wrapper;
-}
 
 static int execute(rr_block *head, int executed) {
     rr_block *current = head;
@@ -124,4 +114,15 @@ int rr_execute(blocks *b, int commands) {
     while (finished_execution < commands) {
         finished_execution = execute(b->rr_head, 0);
     }
+}
+
+blocks *rr_load(pcb **pcbs, int pcb_count, char **args) {
+    blocks *head_wrapper = malloc(sizeof(blocks)); // free OK
+    int quantum = (int)((uintmax_t)strtoumax(args[0], NULL, 10));
+    if (quantum <= 0) {
+        printf("Invalid quantum for RR scheduler\n");
+        exit(1);
+    }
+    head_wrapper->rr_head = load(pcbs, pcb_count, quantum);
+    return head_wrapper;
 }

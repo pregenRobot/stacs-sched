@@ -1,0 +1,6 @@
+# !/bin/bash
+
+rm -rf rr_benchmark
+mkdir rr_benchmark
+
+parallel ./benchmark_rr ::: 1 10 100 1000 10000 100000 1000000

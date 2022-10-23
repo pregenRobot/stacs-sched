@@ -12,13 +12,13 @@
 
 int main(int argc, char **argv) {
 
-    cpu_set_t mask;
-    CPU_ZERO(&mask);
-    CPU_SET(0, &mask);
-    if (sched_setaffinity(0, sizeof(cpu_set_t), &mask) == -1) {
-        printf("sched_setaffinity");
-        exit(1);
-    }
+    // cpu_set_t mask;
+    // CPU_ZERO(&mask);
+    // CPU_SET(0, &mask);
+    // if (sched_setaffinity(0, sizeof(cpu_set_t), &mask) == -1) {
+    //     printf("sched_setaffinity");
+    //     exit(1);
+    // }
 
     scheduler *target_scheduler = malloc(sizeof(scheduler)); // free OK
 
@@ -69,10 +69,9 @@ void free_all(scheduler *target_scheduler, pcb **pcbs, int pcb_count,
 
 int log_stats(pcb **pcbs, int pcb_count) {
     int i;
+    printf("\n=Benchmark=\n");
     for (i = 0; i < pcb_count; i++) {
-        printf("\nStats for %s | response_time: %d burst_time: %d "
-               "turnaround_time: "
-               "%d waiting_time: %d\n",
+        printf("Command: %sresponse_time: %d, burst_time: %d, turnaround_time: %d, waiting_time: %d\n",
                pcbs[i]->full_line, pcbs[i]->response_time, pcbs[i]->burst_time,
                pcbs[i]->turnaround_time, pcbs[i]->waiting_time);
     }
@@ -160,6 +159,7 @@ int parseconfig(char **commands_ref, pcb **pcbs, int command_count) {
         char *empty_line = "\n";
         const char *slash = (char *)'/';
         char *target_command = commands_ref[i];
+        char *full_line = strdup(commands_ref[i]);
 
         if (strcmp(target_command, empty_line) == 0) {
             continue;
@@ -193,7 +193,7 @@ int parseconfig(char **commands_ref, pcb **pcbs, int command_count) {
             process->arg_count = argi;
             process->arguments[argi] = NULL;
         }
-        process->full_line = commands_ref[i];
+        process->full_line = full_line;
         pcbs[p_i] = process;
         p_i++;
         free(tokens);

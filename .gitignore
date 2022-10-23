@@ -2,3 +2,4 @@
 fail
 printchars
 sched
+rr_benchmark/*

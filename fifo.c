@@ -65,8 +65,6 @@ static int execute(fifo_block *head, int executed) {
         int status;
         int terminated = waitpid(current->info->process_id, &status, 0);
 
-        int64_t burst_end = micros();
-
         if (WIFEXITED(status)) {
             log_execute_finish(current->info);
             return execute(current->next, executed) + 1;
