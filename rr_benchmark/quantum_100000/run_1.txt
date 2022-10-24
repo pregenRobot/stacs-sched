@@ -1,0 +1,16 @@
+aceaceaceeaceaceaaceeaceaceaceaceeaceaceacceacceaceaceaceacceaececececececeeceececeeeeeeeeCommand: 2 ./printchars a 20 b
+Command: 15 ./printchars c 30 d
+Command: 7 ./printchars e 40 f
+Read 3 and parsed 3 command lines. Schduler running on cpu 8
+RR Config - Using quantum 100000
+Command: ./printchars  - pid: 91928 - cpu: 9
+Command: ./printchars  - pid: 91943 - cpu: 9
+Command: ./printchars  - pid: 91958 - cpu: 9
+
+=Benchmark=
+Command: 2 ./printchars a 20 b
+response_time: 3451, burst_time: 2101181, turnaround_time: 6106773, waiting_time: 4005592
+Command: 15 ./printchars c 30 d
+response_time: 101829, burst_time: 3001606, turnaround_time: 8006139, waiting_time: 5004533
+Command: 7 ./printchars e 40 f
+response_time: 200133, burst_time: 3701991, turnaround_time: 8804795, waiting_time: 5102804

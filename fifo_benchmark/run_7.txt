@@ -1,0 +1,15 @@
+aaaaaaaaaaaaaaaaaaaacccccccccccccccccccccccccccccceeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeCommand: 2 ./printchars a 20 b
+Command: 15 ./printchars c 30 d
+Command: 7 ./printchars e 40 f
+Read 3 and parsed 3 command lines. Schduler running on cpu 6
+Command: ./printchars  - pid: 86394 - cpu: 6
+Command: ./printchars  - pid: 86395 - cpu: 6
+Command: ./printchars  - pid: 86396 - cpu: 6
+
+=Benchmark=
+Command: 2 ./printchars a 20 b
+response_time: 56, burst_time: 2003285, turnaround_time: 2003341, waiting_time: 56
+Command: 15 ./printchars c 30 d
+response_time: 2003318, burst_time: 3005106, turnaround_time: 5008424, waiting_time: 2003318
+Command: 7 ./printchars e 40 f
+response_time: 5008394, burst_time: 4026303, turnaround_time: 9034697, waiting_time: 5008394
