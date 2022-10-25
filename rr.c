@@ -19,7 +19,7 @@ static rr_block *load(pcb **pcbs, int pcb_count, int quantum) {
     printf("RR Config - Using quantum %d\n", quantum);
     rr_block *current = head;
     for (i = 1; i < pcb_count; i++) {
-        rr_block *next = malloc(sizeof(fifo_block)); // free OK
+        rr_block *next = malloc(sizeof(fcfs_block)); // free OK
         current->next = next;
         current = current->next;
         current->info = pcbs[i];

@@ -56,12 +56,12 @@ class RRBenchmark:
 
 
 
-class FIFOBenchmark:
+class FCFSBenchmark:
     def parse_file(self,run_count):
         benchmark_result = {}
         
         for rc in range(1,run_count+1):
-            with open(f"fifo_benchmark/run_{rc}.txt") as f:
+            with open(f"fcfs_benchmark/run_{rc}.txt") as f:
                 lines = list(f)
                 benchmark_line = 0
                 total_lines = len(lines)
@@ -107,18 +107,18 @@ class FIFOBenchmark:
         return results
 
 
-fifo_benchmark = FIFOBenchmark()
+fcfs_benchmark = FCFSBenchmark()
 rr_benchmark = RRBenchmark()
 rr_results = rr_benchmark.load_benchmark(ignore_outliers=True, transformer=None)
-fifo_results = fifo_benchmark.load_benchmark(ignore_outliers=True,transformer=None)
+fcfs_results = fcfs_benchmark.load_benchmark(ignore_outliers=True,transformer=None)
 
 rr_command1 = list(rr_results.keys())[0]
 rr_command2 = list(rr_results.keys())[1]
 rr_command3 = list(rr_results.keys())[2]
 
-fifo_command1 = list(fifo_results.keys())[0]
-fifo_command2 = list(fifo_results.keys())[1]
-fifo_command3 = list(fifo_results.keys())[2]
+fcfs_command1 = list(fcfs_results.keys())[0]
+fcfs_command2 = list(fcfs_results.keys())[1]
+fcfs_command3 = list(fcfs_results.keys())[2]
 
 
 fig, axs = plt.subplots(4, 1, figsize=(15, 30))
@@ -134,12 +134,12 @@ for m,metric in enumerate(["response_time", "burst_time", "turnaround_time", "wa
         x = list(map(lambda quantum: f"q-{quantum}", rr_target.keys()))
         y = list(rr_target.values())
         
-        x_box = x + ["fifo"]
-        y_box = y + [fifo_results[command][metric]]
+        x_box = x + ["fcfs"]
+        y_box = y + [fcfs_results[command][metric]]
         
         x_plot = x
-        x_plot = x_plot + ["fifo"]
-        y_plot = np.append(np.array(y).mean(axis=1), fifo_results[command][metric].mean())
+        x_plot = x_plot + ["fcfs"]
+        y_plot = np.append(np.array(y).mean(axis=1), fcfs_results[command][metric].mean())
 
         axs[m].plot(x_plot, y_plot, color=color, label=f"#{c+1} {command}")
         axs[m].boxplot(y_box, labels=x_box, whis=1.5, meanline=True,boxprops=dict(color=color), positions=range(len(y_plot)))

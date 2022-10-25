@@ -1,9 +1,9 @@
 # !/bin/bash
 
-rm -rf fifo_benchmark
-mkdir fifo_benchmark
+rm -rf fcfs_benchmark
+mkdir fcfs_benchmark
 
 for i in {1..10}
 do
-    ./sched exec.conf fifo > "fifo_benchmark/run_$i.txt"
+    ./sched exec.conf fcfs > "fcfs_benchmark/run_$i.txt"
 done

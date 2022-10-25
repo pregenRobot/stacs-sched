@@ -3,11 +3,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(gdb) Launch - fifo",
+            "name": "(gdb) Launch - fcfs",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/sched",
-            "args": ["/home/maat1/Documents/cs3104/P1-Scheduler/submission/exec.conf","fifo"],
+            "args": ["/home/maat1/Documents/cs3104/P1-Scheduler/submission/exec.conf","fcfs"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],
@@ -150,7 +150,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/sched",
-            "args": ["/home/maat1/Documents/cs3104/P1-Scheduler/submission/abc.conf","fifo"],
+            "args": ["/home/maat1/Documents/cs3104/P1-Scheduler/submission/abc.conf","fcfs"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],

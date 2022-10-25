@@ -22,11 +22,11 @@ typedef struct {
     int64_t waiting_time;
 } pcb; // process control block
 
-// FIFO
-typedef struct fifo_block {
+// FCFS
+typedef struct fcfs_block {
     pcb *info;
-    struct fifo_block *next;
-} fifo_block;
+    struct fcfs_block *next;
+} fcfs_block;
 
 // mlfq
 typedef struct mlfq_block {
@@ -41,19 +41,19 @@ typedef struct rr_block {
     int quantum;
 } rr_block;
 
-// wrapper for FIFO and mlfq data structures for inheritance
+// wrapper for FCFS and mlfq data structures for inheritance
 typedef struct blocks {
-    fifo_block *fifo_head;
+    fcfs_block *fcfs_head;
     mlfq_block *mlfq_head;
     rr_block *rr_head;
 } blocks;
 
 // Implementations for each scheduler
-// FIFO - First in first Out
-blocks *fifo_load(pcb **pcbs, int pcb_count, char **args);
-int fifo_startup(blocks *b, int executed);
-int fifo_execute(blocks *b, int executed);
-void fifo_free_blocks(blocks *b);
+// FCFS - First in first Out
+blocks *fcfs_load(pcb **pcbs, int pcb_count, char **args);
+int fcfs_startup(blocks *b, int executed);
+int fcfs_execute(blocks *b, int executed);
+void fcfs_free_blocks(blocks *b);
 
 // Priority Queue - Maxheap
 blocks *rr_load(pcb **pcbs, int pcb_count, char **args);

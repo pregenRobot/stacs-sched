@@ -8,13 +8,13 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-static fifo_block *load(pcb **pcbs, int pcb_count) {
+static fcfs_block *load(pcb **pcbs, int pcb_count) {
     int i = 0;
-    fifo_block *head = malloc(sizeof(fifo_block)); // free OK
+    fcfs_block *head = malloc(sizeof(fcfs_block)); // free OK
     head->info = pcbs[0];
-    fifo_block *current = head;
+    fcfs_block *current = head;
     for (i = 1; i < pcb_count; i++) {
-        fifo_block *next = malloc(sizeof(fifo_block)); // free OK
+        fcfs_block *next = malloc(sizeof(fcfs_block)); // free OK
         current->next = next;
         current = current->next;
         current->info = pcbs[i];
@@ -23,15 +23,15 @@ static fifo_block *load(pcb **pcbs, int pcb_count) {
     return head;
 }
 
-static void free_blocks(fifo_block* head){
+static void free_blocks(fcfs_block* head){
     if(head != NULL){
         free_blocks(head->next);
         free(head);
     }
 }
 
-static int startup(fifo_block *head, int executed) {
-    fifo_block *current = head;
+static int startup(fcfs_block *head, int executed) {
+    fcfs_block *current = head;
     if (current != NULL) {
         int pid = fork();
         if (pid == 0) {
@@ -55,8 +55,8 @@ static int startup(fifo_block *head, int executed) {
     return 0;
 }
 
-static int execute(fifo_block *head, int executed) {
-    fifo_block *current = head;
+static int execute(fcfs_block *head, int executed) {
+    fcfs_block *current = head;
     if (current != NULL) {
 
         log_execute_start(current->info);
@@ -77,20 +77,20 @@ static int execute(fifo_block *head, int executed) {
 }
 
 
-blocks *fifo_load(pcb **pcbs, int pcb_count, char **args) {
+blocks *fcfs_load(pcb **pcbs, int pcb_count, char **args) {
     blocks *head_wrapper = malloc(sizeof(blocks)); // free OK
-    head_wrapper->fifo_head = load(pcbs, pcb_count);
+    head_wrapper->fcfs_head = load(pcbs, pcb_count);
     return head_wrapper;
 }
 
-int fifo_startup(blocks *b, int executed) {
-    return startup(b->fifo_head, executed);
+int fcfs_startup(blocks *b, int executed) {
+    return startup(b->fcfs_head, executed);
 }
 
-void fifo_free_blocks(blocks* b){
-    free_blocks(b->fifo_head);
+void fcfs_free_blocks(blocks* b){
+    free_blocks(b->fcfs_head);
 }
 
-int fifo_execute(blocks *b, int executed) {
-    return execute(b->fifo_head, executed);
+int fcfs_execute(blocks *b, int executed) {
+    return execute(b->fcfs_head, executed);
 }
