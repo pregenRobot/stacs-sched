@@ -1,6 +1,8 @@
 {
     "files.associations": {
-        "common.h": "c"
+        "common.h": "c",
+        "inttypes.h": "c",
+        "signal.h": "c"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }

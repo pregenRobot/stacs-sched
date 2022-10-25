@@ -2,3 +2,5 @@
 fail
 printchars
 sched
+rr_benchmark/*
+fcfs_benchmark/*
