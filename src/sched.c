@@ -80,7 +80,7 @@ int log_stats(pcb **pcbs, int pcb_count) {
 int handle_args(scheduler *target_scheduler, int argc, char **argv) {
     if (argc < 3) {
         printf("Arguments not supplied ./sched {exec.conf path} "
-               "{scheduler:fcfs,mlfq,rr} {scheduler args}\n");
+               "{scheduler:fcfs,p_rr,rr} {scheduler args}\n");
         return -1;
     }
 
@@ -97,10 +97,11 @@ int handle_args(scheduler *target_scheduler, int argc, char **argv) {
         target_scheduler->starter = fcfs_startup;
         target_scheduler->free_blocks = fcfs_free_blocks;
         return 0;
-    } else if (argc == 3 && (int)strcmp(argv[2], "mlfq") == 0) {
-        target_scheduler->loader = mlfq_load;
-        target_scheduler->executor = mlfq_execute;
-        target_scheduler->starter = mlfq_startup;
+    } else if (argc == 4 && (int)strcmp(argv[2], "p_rr") == 0) {
+        target_scheduler->loader = p_rr_load;
+        target_scheduler->executor = rr_execute;
+        target_scheduler->starter = rr_startup;
+        target_scheduler->free_blocks = rr_free_blocks;
         return 0;
     } else if (argc == 4 && (int)strcmp(argv[2], "rr") == 0) {
         target_scheduler->loader = rr_load;

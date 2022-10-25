@@ -28,23 +28,15 @@ typedef struct fcfs_block {
     struct fcfs_block *next;
 } fcfs_block;
 
-// mlfq
-typedef struct mlfq_block {
-    pcb *info;
-    struct mlfq_block *left;
-    struct mlfq_block *right;
-} mlfq_block;
-
 typedef struct rr_block {
     pcb *info;
     struct rr_block *next;
     int quantum;
 } rr_block;
 
-// wrapper for FCFS and mlfq data structures for inheritance
+// wrapper for FCFS and p_rr data structures for inheritance
 typedef struct blocks {
     fcfs_block *fcfs_head;
-    mlfq_block *mlfq_head;
     rr_block *rr_head;
 } blocks;
 
@@ -62,10 +54,10 @@ int rr_execute(blocks *b, int executed);
 void rr_free_blocks(blocks* b);
 
 // Priority Queue - Maxheap
-blocks *mlfq_load(pcb **pcbs, int pcb_count, char **args);
-int mlfq_startup(blocks *b, int executed);
-int mlfq_execute(blocks *b, int executed);
-void mlfq_free_blocks(blocks *b);
+blocks *p_rr_load(pcb **pcbs, int pcb_count, char **args);
+int p_rr_startup(blocks *b, int executed);
+int p_rr_execute(blocks *b, int executed);
+void p_rr_free_blocks(blocks *b);
 
 // Parsers and configurers
 int readconfig(char ***commands_ref, char *path);
@@ -73,6 +65,7 @@ int parseconfig(char **commands_ref, pcb **pcbs, int command_count);
 char **str_split(char *a_str, const char a_delim);
 char *join_strings(char **strings, char *separator);
 bool isNumeric(const char *s);
+#define NONE ((void *)0)
 
 typedef struct scheduler {
     blocks *(*loader)(pcb **, int, char **);
