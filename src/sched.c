@@ -12,26 +12,22 @@
 
 int main(int argc, char **argv) {
 
-    // cpu_set_t mask;
-    // CPU_ZERO(&mask);
-    // CPU_SET(0, &mask);
-    // if (sched_setaffinity(0, sizeof(cpu_set_t), &mask) == -1) {
-    //     printf("sched_setaffinity");
-    //     exit(1);
-    // }
-
     scheduler *target_scheduler = malloc(sizeof(scheduler)); // free OK
 
+    // Dynamically determine the scheduling algorithm and allocate relevant
+    // methods
     if (handle_args(target_scheduler, argc, argv) == -1) {
         printf("Error with configuration\n");
         exit(1);
     }
 
+    // Read configuration file
     char **commands;
     int command_count = readconfig(&commands, argv[1]);
     for (int i = 0; i < command_count; i++)
         printf("Command: %s", commands[i]);
 
+    // Parse configuration file
     pcb **pcbs = malloc(command_count * sizeof(pcb *)); // free OK
     int parse_count = parseconfig(commands, pcbs, command_count);
     printf("Read %d and parsed %d command lines. Schduler running on cpu %d\n",
@@ -41,11 +37,15 @@ int main(int argc, char **argv) {
         exit(0);
     }
 
+    // Create the relevant datastructure for the scheduler
     blocks *head = (target_scheduler->loader)(pcbs, parse_count, &(argv[3]));
+    // Startup the relevant processes
     int startup_result = (target_scheduler->starter)(head, parse_count);
+    // Execute the processes
     int execute_result = (target_scheduler->executor)(head, parse_count);
     log_stats(pcbs, parse_count);
 
+    // Free the memory used for the program
     free_all(target_scheduler, pcbs, parse_count, head, commands,
              command_count);
     return 0;
@@ -92,6 +92,7 @@ int handle_args(scheduler *target_scheduler, int argc, char **argv) {
         return -1;
     }
 
+    // Determine the methods needed to run the scheduler
     if (argc == 3 && (int)strcmp(argv[2], "fcfs") == 0) {
         target_scheduler->loader = fcfs_load;
         target_scheduler->executor = fcfs_execute;
@@ -163,15 +164,19 @@ int parseconfig(char **commands_ref, pcb **pcbs, int command_count) {
         char *target_command = commands_ref[i];
         char *full_line = strdup(commands_ref[i]);
 
+        // Ignore empty lines
         if (strcmp(target_command, empty_line) == 0) {
             continue;
         }
+
+        // Split each lines into tokens
         char **tokens = str_split(target_command, ' ');
         if (!*(tokens) || !*(tokens + 1) || !isNumeric(*tokens)) {
             printf("\nConfig file has invalid line at %d\n", i + 1);
             continue;
         }
 
+        // Parse line
         pcb *process = (pcb *)malloc(sizeof(pcb)); // free OK
 
         process->process_id = -1;
@@ -182,6 +187,7 @@ int parseconfig(char **commands_ref, pcb **pcbs, int command_count) {
             (char *)malloc(sizeof(char) * LINE_MAX_LENGTH); // free OK
         process->executable_path = strdup(*(tokens + 1));
 
+        // Interpret the number of arguments necessary for the command
         process->arguments =
             malloc(sizeof(char *) * LINE_MAX_LENGTH); // free OK
         if (*(tokens + 2)) {
