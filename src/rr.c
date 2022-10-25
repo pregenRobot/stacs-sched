@@ -49,7 +49,7 @@ static int startup(rr_block *head, int executed) {
             execvp(current->info->executable_path, current->info->arguments);
         } else {
             kill(pid, SIGSTOP);
-            printf("Command: %s  - pid: %d - cpu: %d\n",
+            printf("Priority: %d Command: %s  - pid: %d - cpu: %d\n", current->info->priority,
                    current->info->executable_path, pid, sched_getcpu());
             current->info->process_id = pid;
             current->info->status = 0;

@@ -53,11 +53,8 @@ int rr_startup(blocks *b, int executed);
 int rr_execute(blocks *b, int executed);
 void rr_free_blocks(blocks* b);
 
-// Priority Queue - Maxheap
+// Priority Queue
 blocks *p_rr_load(pcb **pcbs, int pcb_count, char **args);
-int p_rr_startup(blocks *b, int executed);
-int p_rr_execute(blocks *b, int executed);
-void p_rr_free_blocks(blocks *b);
 
 // Parsers and configurers
 int readconfig(char ***commands_ref, char *path);

@@ -43,27 +43,6 @@ static rr_block *load(pcb **pcbs, int pcb_count, int quantum) {
     return head;
 }
 
-static int startup(rr_block *head, int executed) {
-}
-
-static void free_blocks(rr_block* head){
-}
-
-
-static int execute(rr_block *head, int executed) {
-}
-
-void p_rr_free_blocks(blocks* b){
-    free_blocks(b->rr_head);
-}
-
-int p_rr_startup(blocks *b, int commands) {
-    return startup(b->rr_head, 0);
-}
-
-int p_rr_execute(blocks *b, int commands) {
-}
-
 blocks *p_rr_load(pcb **pcbs, int pcb_count, char **args) {
     blocks *head_wrapper = malloc(sizeof(blocks)); // free OK
     int quantum = (int)((uintmax_t) strtoumax(args[0], NULL, 10));
