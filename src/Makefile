@@ -8,3 +8,5 @@ all:
 	gcc -o fail -g ./fail.c
 clean:
 	rm -f sched
+	rm -f printchars
+	rm -f fail
