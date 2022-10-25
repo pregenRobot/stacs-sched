@@ -23,8 +23,8 @@ static fcfs_block *load(pcb **pcbs, int pcb_count) {
     return head;
 }
 
-static void free_blocks(fcfs_block* head){
-    if(head != NULL){
+static void free_blocks(fcfs_block *head) {
+    if (head != NULL) {
         free_blocks(head->next);
         free(head);
     }
@@ -41,7 +41,6 @@ static int startup(fcfs_block *head, int executed) {
             current->info->status = -2;
             return startup(current->next, executed) + 1;
         }
-        
 
         int pid = fork();
         if (pid == 0) {
@@ -50,8 +49,9 @@ static int startup(fcfs_block *head, int executed) {
             execvp(current->info->executable_path, current->info->arguments);
         } else if (pid > 1) {
             kill(pid, SIGSTOP);
-            printf("Priority: %d Command: %s  - pid: %d - cpu: %d\n", current->info->priority,
-                   current->info->executable_path, pid, sched_getcpu());
+            printf("Priority: %d Command: %s  - pid: %d - cpu: %d\n",
+                   current->info->priority, current->info->executable_path, pid,
+                   sched_getcpu());
             current->info->process_id = pid;
             current->info->status = 0;
             log_startup(current->info);
@@ -85,7 +85,6 @@ static int execute(fcfs_block *head, int executed) {
     return 0;
 }
 
-
 blocks *fcfs_load(pcb **pcbs, int pcb_count, char **args) {
     blocks *head_wrapper = malloc(sizeof(blocks)); // free OK
     head_wrapper->fcfs_head = load(pcbs, pcb_count);
@@ -96,9 +95,7 @@ int fcfs_startup(blocks *b, int executed) {
     return startup(b->fcfs_head, executed);
 }
 
-void fcfs_free_blocks(blocks* b){
-    free_blocks(b->fcfs_head);
-}
+void fcfs_free_blocks(blocks *b) { free_blocks(b->fcfs_head); }
 
 int fcfs_execute(blocks *b, int executed) {
     return execute(b->fcfs_head, executed);

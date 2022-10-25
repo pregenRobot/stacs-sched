@@ -49,8 +49,9 @@ static int startup(rr_block *head, int executed) {
             execvp(current->info->executable_path, current->info->arguments);
         } else {
             kill(pid, SIGSTOP);
-            printf("Priority: %d Command: %s  - pid: %d - cpu: %d\n", current->info->priority,
-                   current->info->executable_path, pid, sched_getcpu());
+            printf("Priority: %d Command: %s  - pid: %d - cpu: %d\n",
+                   current->info->priority, current->info->executable_path, pid,
+                   sched_getcpu());
             current->info->process_id = pid;
             current->info->status = 0;
             log_startup(current->info);
@@ -60,13 +61,12 @@ static int startup(rr_block *head, int executed) {
     return 0;
 }
 
-static void free_blocks(rr_block* head){
-    if(head != NULL){
+static void free_blocks(rr_block *head) {
+    if (head != NULL) {
         free_blocks(head->next);
         free(head);
     }
 }
-
 
 static int execute(rr_block *head, int executed) {
     rr_block *current = head;
@@ -103,9 +103,7 @@ static int execute(rr_block *head, int executed) {
     return 0;
 }
 
-void rr_free_blocks(blocks* b){
-    free_blocks(b->rr_head);
-}
+void rr_free_blocks(blocks *b) { free_blocks(b->rr_head); }
 
 int rr_startup(blocks *b, int commands) { return startup(b->rr_head, 0); }
 

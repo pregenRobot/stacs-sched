@@ -51,7 +51,7 @@ void fcfs_free_blocks(blocks *b);
 blocks *rr_load(pcb **pcbs, int pcb_count, char **args);
 int rr_startup(blocks *b, int executed);
 int rr_execute(blocks *b, int executed);
-void rr_free_blocks(blocks* b);
+void rr_free_blocks(blocks *b);
 
 // Priority Queue
 blocks *p_rr_load(pcb **pcbs, int pcb_count, char **args);
@@ -68,7 +68,7 @@ typedef struct scheduler {
     blocks *(*loader)(pcb **, int, char **);
     int (*starter)(blocks *, int);
     int (*executor)(blocks *, int);
-    void (*free_blocks)(blocks*);
+    void (*free_blocks)(blocks *);
 } scheduler;
 
 int handle_args(scheduler *target_scheduler, int argc, char **argv);

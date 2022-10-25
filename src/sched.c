@@ -71,7 +71,8 @@ int log_stats(pcb **pcbs, int pcb_count) {
     int i;
     printf("\n=Benchmark=\n");
     for (i = 0; i < pcb_count; i++) {
-        printf("Command: %sresponse_time: %d, burst_time: %d, turnaround_time: %d, waiting_time: %d\n",
+        printf("Command: %sresponse_time: %d, burst_time: %d, turnaround_time: "
+               "%d, waiting_time: %d\n",
                pcbs[i]->full_line, pcbs[i]->response_time, pcbs[i]->burst_time,
                pcbs[i]->turnaround_time, pcbs[i]->waiting_time);
     }

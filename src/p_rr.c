@@ -12,24 +12,24 @@
 
 static rr_block *load(pcb **pcbs, int pcb_count, int quantum) {
     int i = 0;
-    rr_block *head = calloc(1,sizeof(rr_block));
+    rr_block *head = calloc(1, sizeof(rr_block));
     head->info = pcbs[0];
     head->quantum = quantum;
-    for (i =1; i < pcb_count; i++){
+    for (i = 1; i < pcb_count; i++) {
         rr_block *insert_position = head;
         rr_block *new_node = malloc(sizeof(rr_block));
         // swap heads if new priority is lower priority than the head
-        if(head->info->priority >= pcbs[i]->priority){
-            rr_block* new_head = new_node;
+        if (head->info->priority >= pcbs[i]->priority) {
+            rr_block *new_head = new_node;
             new_node->info = pcbs[i];
             new_head->next = head;
             head = new_head;
-        }else{
+        } else {
             // iterate over all the nodes and insert in the appropriate position
-            while(insert_position->next != 0x0){
-                if(insert_position->next->info->priority < pcbs[i]->priority){
+            while (insert_position->next != 0x0) {
+                if (insert_position->next->info->priority < pcbs[i]->priority) {
                     insert_position = insert_position->next;
-                }else{
+                } else {
                     break;
                 }
             }
@@ -45,11 +45,11 @@ static rr_block *load(pcb **pcbs, int pcb_count, int quantum) {
 
 blocks *p_rr_load(pcb **pcbs, int pcb_count, char **args) {
     blocks *head_wrapper = malloc(sizeof(blocks)); // free OK
-    int quantum = (int)((uintmax_t) strtoumax(args[0], NULL, 10));
-    if(quantum <= 0){
+    int quantum = (int)((uintmax_t)strtoumax(args[0], NULL, 10));
+    if (quantum <= 0) {
         printf("Invalid quantum for RR scheduler\n");
         exit(1);
     }
-    head_wrapper->rr_head = load(pcbs,pcb_count, quantum);
+    head_wrapper->rr_head = load(pcbs, pcb_count, quantum);
     return head_wrapper;
 }
