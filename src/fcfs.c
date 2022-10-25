@@ -33,6 +33,16 @@ static void free_blocks(fcfs_block* head){
 static int startup(fcfs_block *head, int executed) {
     fcfs_block *current = head;
     if (current != NULL) {
+        if (!command_is_executable(current->info->executable_path)) {
+            printf("Cannot find executable %s - file does not exist and it is "
+                   "not in "
+                   "PATH. Skipping...",
+                   current->info->executable_path);
+            current->info->status = -2;
+            return startup(current->next, executed) + 1;
+        }
+        
+
         int pid = fork();
         if (pid == 0) {
             current->info->status = 1;
